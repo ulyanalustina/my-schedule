@@ -3,393 +3,532 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>📚 Расписание</title>
+    <title>📅 Расписание занятий</title>
     <style>
+        /* Сброс и базовые стили */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
+        
         body {
-            background: linear-gradient(135deg, #ffe6f2 0%, #ffd9ec 100%);
-            color: #5a3d5c;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
             min-height: 100vh;
-            padding: 10px;
-            font-size: 14px;
-            overflow-x: hidden;
+            padding: 16px;
+            font-size: 15px;
+            line-height: 1.5;
         }
+        
+        /* Основной контейнер */
         .container {
             max-width: 100%;
             margin: 0 auto;
             background: white;
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(255, 182, 193, 0.15);
-            padding: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 24px 20px;
+            position: relative;
             overflow: hidden;
         }
+        
+        /* Заголовок */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
         h1 {
-            text-align: center;
-            color: #d63384;
-            margin-bottom: 8px;
-            font-size: 1.4em;
+            color: #2d3748;
+            font-size: 1.6em;
             font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
         }
+        
         .subtitle {
-            text-align: center;
-            color: #8a6d8b;
-            margin-bottom: 16px;
-            font-size: 0.9em;
-            line-height: 1.3;
-            padding: 0 8px;
+            color: #718096;
+            font-size: 0.95em;
+            line-height: 1.4;
         }
-        .controls {
-            margin-bottom: 16px;
-            background: linear-gradient(145deg, #ffeef8, #ffe3f0);
-            padding: 12px;
+        
+        /* Информация о текущем дне */
+        .current-day {
+            background: #f7fafc;
             border-radius: 12px;
-            border: 1px solid #ffcfe0;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
         }
+        
+        .day-name {
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 4px;
+        }
+        
+        .week-type {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+        
+        .week-numerator {
+            background: #e6fffa;
+            color: #234e52;
+            border: 1px solid #81e6d9;
+        }
+        
+        .week-denominator {
+            background: #fff5f5;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+        
+        /* Панель управления */
+        .controls {
+            margin-bottom: 24px;
+        }
+        
         .day-selector {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 6px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
+        
         .day-btn {
-            padding: 8px 4px;
-            border: none;
+            padding: 10px 4px;
+            border: 1px solid #e2e8f0;
             border-radius: 10px;
-            background: linear-gradient(145deg, #ffcfe0, #ffb8d9);
+            background: white;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-            color: #8a446c;
-            font-size: 0.85em;
-            min-height: 36px;
+            font-weight: 500;
+            font-size: 0.9em;
+            color: #4a5568;
+            transition: all 0.2s ease;
+            text-align: center;
+            min-height: 42px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
+        
+        .day-btn:hover {
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
         .day-btn.active {
-            background: linear-gradient(145deg, #ff85b3, #ff6da4);
+            background: #4299e1;
             color: white;
-            box-shadow: 0 2px 6px rgba(214, 51, 132, 0.2);
+            border-color: #4299e1;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(66, 153, 225, 0.3);
         }
+        
+        .day-btn .short {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .day-btn .full {
+            font-size: 0.75em;
+            opacity: 0.8;
+        }
+        
         .week-btn {
             width: 100%;
-            padding: 10px;
+            padding: 14px;
             border: none;
             border-radius: 10px;
-            background: linear-gradient(145deg, #ffb8d9, #ff9ac5);
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
             color: white;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.95em;
-            margin-top: 8px;
+            font-size: 1em;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            transition: all 0.2s ease;
         }
-        .current-info {
+        
+        .week-btn:hover {
+            background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        }
+        
+        /* Расписание */
+        .schedule-container {
+            min-height: 200px;
+        }
+        
+        .no-lessons {
             text-align: center;
-            margin: 12px 0;
-            padding: 12px;
-            background: linear-gradient(145deg, #fff0f7, #ffe6f0);
+            padding: 48px 20px;
+            color: #a0aec0;
+            font-size: 1em;
+            background: #f7fafc;
             border-radius: 12px;
-            border-left: 4px solid #ffb8d9;
-            font-size: 0.95em;
+            border: 1px dashed #e2e8f0;
         }
-        .week-indicator {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-weight: bold;
-            margin: 0 4px;
-            font-size: 0.85em;
-        }
-        .week-numerator {
-            background: linear-gradient(145deg, #a8d8ea, #8ac6d8);
-            color: white;
-        }
-        .week-denominator {
-            background: linear-gradient(145deg, #ffb6c1, #ff9aac);
-            color: white;
-        }
+        
+        /* Таблица расписания */
         .schedule-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 12px;
-            font-size: 0.9em;
-            table-layout: fixed;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
+        
         .schedule-table th {
-            background: linear-gradient(145deg, #ffcfe0, #ffb8d9);
-            color: #8a446c;
-            padding: 10px 8px;
+            background: #f7fafc;
+            color: #4a5568;
+            padding: 14px 12px;
             text-align: left;
             font-weight: 600;
             font-size: 0.9em;
+            border-bottom: 1px solid #e2e8f0;
         }
+        
         .schedule-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #ffe6f2;
+            padding: 14px 12px;
+            border-bottom: 1px solid #f1f5f9;
             vertical-align: top;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
         }
-        .schedule-table tr:nth-child(even) {
-            background-color: rgba(255, 240, 245, 0.7);
+        
+        .schedule-table tr:last-child td {
+            border-bottom: none;
         }
-        .time-col {
-            width: 30%;
-            font-weight: 600;
-            color: #ff6da4;
+        
+        .schedule-table tr:hover {
+            background: #f7fafc;
         }
-        .subject-col {
-            width: 45%;
+        
+        .time-cell {
+            color: #2d3748;
             font-weight: 500;
-            color: #8a446c;
+            white-space: nowrap;
+            width: 30%;
         }
-        .room-col {
-            width: 25%;
-            color: #b8a2b9;
+        
+        .subject-cell {
+            color: #2d3748;
+            font-weight: 500;
+            width: 45%;
+        }
+        
+        .room-cell {
+            color: #718096;
             font-size: 0.9em;
+            width: 25%;
         }
-        .no-lessons {
-            text-align: center;
-            padding: 30px 16px;
-            color: #b8a2b9;
-            font-style: italic;
-            font-size: 0.95em;
-            background: linear-gradient(145deg, #fff8fb, #fff0f7);
-            border-radius: 12px;
-            margin: 12px 0;
-            border: 1px dashed #ffcfe0;
-        }
+        
+        /* Полное расписание на неделю */
         .full-week-title {
             text-align: center;
-            margin: 16px 0;
-            color: #d63384;
-            font-size: 1.2em;
+            color: #2d3748;
+            font-size: 1.3em;
             font-weight: 600;
+            margin: 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
         }
-        .day-schedule {
-            margin-bottom: 12px;
-            border: 1px solid #ffcfe0;
-            border-radius: 12px;
-            overflow: hidden;
+        
+        .week-schedule {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .day-card {
             background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: all 0.2s ease;
         }
-        .day-header {
-            background: linear-gradient(145deg, #ffcfe0, #ffb8d9);
-            color: #8a446c;
-            padding: 10px;
-            font-weight: 600;
-            font-size: 0.95em;
+        
+        .day-card:hover {
+            border-color: #cbd5e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .day-card.today {
+            border-color: #4299e1;
+            border-width: 2px;
+        }
+        
+        .day-card-header {
+            background: #f7fafc;
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #e2e8f0;
         }
-        .day-lessons {
-            padding: 12px;
-        }
-        .lesson-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 10px;
-            border-bottom: 1px solid #ffe6f2;
-        }
-        .lesson-item:last-child {
-            border-bottom: none;
-        }
-        .lesson-time {
+        
+        .day-card-name {
+            color: #2d3748;
             font-weight: 600;
-            color: #ff6da4;
-            font-size: 0.9em;
+            font-size: 1em;
         }
-        .lesson-subject {
-            color: #8a446c;
+        
+        .day-card-lessons {
+            padding: 16px;
+        }
+        
+        .lesson-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            margin-bottom: 8px;
+        }
+        
+        .lesson-card:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .lesson-time {
+            min-width: 80px;
+            color: #4299e1;
             font-weight: 500;
-            line-height: 1.3;
+            font-size: 0.9em;
+            white-space: nowrap;
         }
+        
+        .lesson-content {
+            flex: 1;
+        }
+        
+        .lesson-subject {
+            color: #2d3748;
+            font-weight: 500;
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        
         .lesson-room {
-            color: #b8a2b9;
+            color: #718096;
             font-size: 0.85em;
-            padding: 4px 8px;
-            background: rgba(255, 207, 224, 0.2);
-            border-radius: 6px;
-            display: inline-block;
-            align-self: flex-start;
         }
+        
         .back-btn {
             width: 100%;
-            padding: 10px;
-            border: none;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
             border-radius: 10px;
-            background: linear-gradient(145deg, #ffcfe0, #ffb8d9);
-            color: #8a446c;
+            background: white;
+            color: #4a5568;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.95em;
-            margin: 16px 0;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: all 0.2s ease;
         }
+        
         .back-btn:hover {
-            background: linear-gradient(145deg, #ffb8d9, #ff9ac5);
-            color: white;
+            background: #f7fafc;
+            border-color: #cbd5e0;
         }
-        .compact-table {
-            display: block;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .compact-row {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 12px;
-            border-bottom: 1px solid #ffe6f2;
-            background: white;
-        }
-        .compact-row:nth-child(even) {
-            background-color: rgba(255, 240, 245, 0.7);
-        }
-        .compact-time {
-            font-weight: 600;
-            color: #ff6da4;
-            font-size: 0.95em;
-        }
-        .compact-subject {
-            color: #8a446c;
-            font-weight: 500;
-            line-height: 1.3;
-        }
-        .compact-room {
-            color: #b8a2b9;
-            font-size: 0.85em;
-            align-self: flex-start;
-            padding: 4px 8px;
-            background: rgba(255, 207, 224, 0.2);
-            border-radius: 6px;
-        }
-        @media (max-width: 480px) {
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
             body {
-                padding: 8px;
-                font-size: 13px;
-            }
-            .container {
                 padding: 12px;
-                border-radius: 12px;
+                font-size: 14px;
             }
+            
+            .container {
+                padding: 20px 16px;
+                border-radius: 14px;
+            }
+            
             h1 {
-                font-size: 1.2em;
+                font-size: 1.4em;
             }
+            
             .day-selector {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 4px;
+                gap: 6px;
             }
+            
             .day-btn {
-                font-size: 0.8em;
-                min-height: 32px;
-                padding: 6px 3px;
-            }
-            .day-btn:nth-child(n+8) {
-                grid-column: span 2;
-            }
-            .schedule-table {
+                padding: 8px 2px;
+                min-height: 38px;
                 font-size: 0.85em;
             }
+            
+            .day-btn .short {
+                font-size: 1em;
+            }
+            
+            .day-btn .full {
+                display: none;
+            }
+            
             .schedule-table th,
             .schedule-table td {
-                padding: 8px 6px;
+                padding: 12px 8px;
+                font-size: 0.9em;
             }
-            .time-col {
+            
+            .time-cell {
                 width: 35%;
             }
-            .subject-col {
+            
+            .subject-cell {
                 width: 40%;
             }
-            .room-col {
+            
+            .room-cell {
                 width: 25%;
             }
-            .lesson-item {
-                padding: 8px;
-                gap: 4px;
-            }
         }
-        @media (max-width: 320px) {
-            body {
-                font-size: 12px;
-            }
-            .day-selector {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .day-btn {
-                font-size: 0.75em;
-            }
-            .day-btn:nth-child(n+7) {
-                grid-column: span 1;
-            }
-            .day-btn:nth-child(7) {
-                grid-column: 1 / span 3;
-            }
-        }
-        @media (min-width: 768px) {
-            body {
-                padding: 20px;
-                font-size: 15px;
-            }
+        
+        @media (max-width: 480px) {
             .container {
-                max-width: 600px;
-                padding: 20px;
+                padding: 16px 12px;
             }
+            
             .day-selector {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .day-btn:nth-child(5),
+            .day-btn:nth-child(6),
+            .day-btn:nth-child(7) {
+                grid-column: span 2;
+            }
+            
+            .schedule-table {
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .lesson-card {
+                flex-direction: column;
                 gap: 8px;
             }
-            .day-btn {
-                padding: 10px 6px;
-                min-height: 40px;
+            
+            .lesson-time {
+                min-width: 100%;
             }
+        }
+        
+        @media (max-width: 320px) {
+            .day-selector {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+            }
+            
+            .day-btn:nth-child(7) {
+                grid-column: span 3;
+            }
+        }
+        
+        /* Анимации */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Декоративные элементы */
+        .decoration {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, rgba(66, 153, 225, 0.05) 0%, rgba(49, 130, 206, 0.05) 100%);
+            border-radius: 0 0 0 100%;
+            z-index: 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📚 Расписание</h1>
-        <p class="subtitle">Автоматически показывает расписание на сегодня</p>
-
-        <div class="current-info">
-            <!-- Информация о текущем дне и неделе -->
+        <div class="decoration"></div>
+        
+        <div class="header">
+            <h1>📅 Расписание занятий</h1>
+            <p class="subtitle">Выберите день для просмотра расписания</p>
         </div>
-
+        
+        <div class="current-day" id="currentInfo">
+            <!-- Информация о текущем дне -->
+        </div>
+        
         <div class="controls">
             <div class="day-selector">
-                <button class="day-btn" data-day="0">Пн</button>
-                <button class="day-btn" data-day="1">Вт</button>
-                <button class="day-btn" data-day="2">Ср</button>
-                <button class="day-btn" data-day="3">Чт</button>
-                <button class="day-btn" data-day="4">Пт</button>
-                <button class="day-btn" data-day="5">Сб</button>
-                <button class="day-btn" data-day="6">Вс</button>
+                <button class="day-btn" data-day="0">
+                    <span class="short">Пн</span>
+                    <span class="full">Понедельник</span>
+                </button>
+                <button class="day-btn" data-day="1">
+                    <span class="short">Вт</span>
+                    <span class="full">Вторник</span>
+                </button>
+                <button class="day-btn" data-day="2">
+                    <span class="short">Ср</span>
+                    <span class="full">Среда</span>
+                </button>
+                <button class="day-btn" data-day="3">
+                    <span class="short">Чт</span>
+                    <span class="full">Четверг</span>
+                </button>
+                <button class="day-btn" data-day="4">
+                    <span class="short">Пт</span>
+                    <span class="full">Пятница</span>
+                </button>
+                <button class="day-btn" data-day="5">
+                    <span class="short">Сб</span>
+                    <span class="full">Суббота</span>
+                </button>
+                <button class="day-btn" data-day="6">
+                    <span class="short">Вс</span>
+                    <span class="full">Воскресенье</span>
+                </button>
             </div>
+            
             <button class="week-btn" id="fullWeekBtn">
-                📅 Полное расписание
+                <span>📋</span>
+                <span>Расписание на неделю</span>
             </button>
         </div>
-
-        <div id="schedule">
-            <!-- Сюда JS вставит расписание -->
-            <p class="no-lessons">Загрузка расписания...</p>
+        
+        <div class="schedule-container" id="schedule">
+            <div class="no-lessons">Выберите день для просмотра расписания</div>
         </div>
     </div>
 
@@ -435,7 +574,7 @@
                 ],
                 "2": [],
                 "3": [
-                     { time: "8:20 - 9:50", subject: "Экономика предприятия", room: "Каб. 311/6к" },
+                    { time: "8:20 - 9:50", subject: "Экономика предприятия", room: "Каб. 311/6к" },
                     { time: "10:00 - 11:30", subject: "Экономика предприятия", room: "Каб. 311/6к" },
                     { time: "12:10 - 13:40", subject: "Финансы организации", room: "Каб. 311/6к" }
                 ],
@@ -480,89 +619,74 @@
         
         const currentWeekType = getCurrentWeekType();
 
-        // Функция отрисовки расписания на один день (компактная версия)
-        function renderDaySchedule(weekType, dayIndex) {
-            const scheduleDiv = document.getElementById('schedule');
-            const currentInfoDiv = document.querySelector('.current-info');
-            
-            const lessons = scheduleData[weekType][dayIndex.toString()];
+        // Функция обновления информации о текущем дне
+        function updateCurrentInfo(dayIndex, weekType) {
+            const currentInfoDiv = document.getElementById('currentInfo');
             const weekClassName = weekType === 'numerator' ? 'week-numerator' : 'week-denominator';
-            const weekName = weekType === 'numerator' ? 'ЧИСЛИТЕЛЬ' : 'ЗНАМЕНАТЕЛЬ';
+            const weekName = weekType === 'numerator' ? 'Числитель' : 'Знаменатель';
             
             currentInfoDiv.innerHTML = `
-                <div style="font-weight: 600; color: #d63384;">${dayNames[dayIndex]}</div>
-                <div style="margin-top: 4px; font-size: 0.9em;">
-                    Неделя: <span class="week-indicator ${weekClassName}">${weekName}</span>
-                </div>
+                <div class="day-name">${dayNames[dayIndex]}</div>
+                <div class="week-type ${weekClassName}">${weekName}</div>
             `;
+        }
 
+        // Функция отрисовки расписания на один день
+        function renderDaySchedule(weekType, dayIndex) {
+            const scheduleDiv = document.getElementById('schedule');
+            const lessons = scheduleData[weekType][dayIndex.toString()];
+            
+            updateCurrentInfo(dayIndex, weekType);
+            
             if (!lessons || lessons.length === 0) {
-                scheduleDiv.innerHTML = '<p class="no-lessons">🎓 Занятий нет</p>';
+                scheduleDiv.innerHTML = `
+                    <div class="no-lessons fade-in">
+                        🎉 В этот день занятий нет
+                        <div style="font-size: 0.9em; margin-top: 8px; color: #a0aec0;">
+                            Можно отдохнуть или заняться своими делами
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
-            // Используем компактную версию для мобильных
-            if (window.innerWidth <= 768) {
-                let compactHTML = '<div class="compact-table">';
-                
-                lessons.forEach(lesson => {
-                    compactHTML += `
-                        <div class="compact-row">
-                            <div class="compact-time">${lesson.time}</div>
-                            <div class="compact-subject">${lesson.subject}</div>
-                            <div class="compact-room">${lesson.room}</div>
-                        </div>
-                    `;
-                });
-                
-                compactHTML += '</div>';
-                scheduleDiv.innerHTML = compactHTML;
-            } else {
-                // Для десктопа - обычная таблица
-                let tableHTML = `
-                    <table class="schedule-table">
-                        <thead>
-                            <tr>
-                                <th class="time-col">Время</th>
-                                <th class="subject-col">Предмет</th>
-                                <th class="room-col">Кабинет</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-
-                lessons.forEach(lesson => {
-                    tableHTML += `
+            let tableHTML = `
+                <table class="schedule-table fade-in">
+                    <thead>
                         <tr>
-                            <td class="time-col">${lesson.time}</td>
-                            <td class="subject-col">${lesson.subject}</td>
-                            <td class="room-col">${lesson.room}</td>
+                            <th>Время</th>
+                            <th>Предмет</th>
+                            <th>Кабинет</th>
                         </tr>
-                    `;
-                });
+                    </thead>
+                    <tbody>
+            `;
 
-                tableHTML += '</tbody></table>';
-                scheduleDiv.innerHTML = tableHTML;
-            }
+            lessons.forEach(lesson => {
+                tableHTML += `
+                    <tr>
+                        <td class="time-cell">${lesson.time}</td>
+                        <td class="subject-cell">${lesson.subject}</td>
+                        <td class="room-cell">${lesson.room}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            scheduleDiv.innerHTML = tableHTML;
         }
 
         // Функция отрисовки полного расписания на неделю
         function renderFullWeekSchedule() {
             const scheduleDiv = document.getElementById('schedule');
-            const currentInfoDiv = document.querySelector('.current-info');
             const weekType = getCurrentWeekType();
             
-            const weekClassName = weekType === 'numerator' ? 'week-numerator' : 'week-denominator';
-            const weekName = weekType === 'numerator' ? 'ЧИСЛИТЕЛЬ' : 'ЗНАМЕНАТЕЛЬ';
+            updateCurrentInfo(currentDayOfWeek, weekType);
             
-            currentInfoDiv.innerHTML = `
-                <div style="font-weight: 600; color: #d63384;">Расписание на неделю</div>
-                <div style="margin-top: 4px; font-size: 0.9em;">
-                    Неделя: <span class="week-indicator ${weekClassName}">${weekName}</span>
-                </div>
+            let weekHTML = `
+                <div class="full-week-title fade-in">Расписание на неделю</div>
+                <div class="week-schedule fade-in">
             `;
-
-            let weekHTML = '<div class="full-week-title">📅 Недельное расписание</div>';
 
             for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
                 const lessons = scheduleData[weekType][dayIndex.toString()];
@@ -570,23 +694,31 @@
                 const isToday = dayIndex === currentDayOfWeek;
                 
                 weekHTML += `
-                    <div class="day-schedule">
-                        <div class="day-header">
-                            <span>${dayName}${isToday ? ' 🌟' : ''}</span>
-                            <span class="week-indicator ${weekClassName}" style="font-size: 0.8em;">${weekName}</span>
+                    <div class="day-card ${isToday ? 'today' : ''}">
+                        <div class="day-card-header">
+                            <div class="day-card-name">${dayName}${isToday ? ' (сегодня)' : ''}</div>
+                            <div class="week-type ${weekType === 'numerator' ? 'week-numerator' : 'week-denominator'}" style="font-size: 0.8em;">
+                                ${weekType === 'numerator' ? 'Числитель' : 'Знаменатель'}
+                            </div>
                         </div>
-                        <div class="day-lessons">
+                        <div class="day-card-lessons">
                 `;
                 
                 if (!lessons || lessons.length === 0) {
-                    weekHTML += '<div style="padding: 10px; color: #b8a2b9; text-align: center; font-style: italic; font-size: 0.9em;">Занятий нет</div>';
+                    weekHTML += `
+                        <div style="text-align: center; padding: 16px; color: #a0aec0; font-style: italic;">
+                            Занятий нет
+                        </div>
+                    `;
                 } else {
                     lessons.forEach(lesson => {
                         weekHTML += `
-                            <div class="lesson-item">
+                            <div class="lesson-card">
                                 <div class="lesson-time">${lesson.time}</div>
-                                <div class="lesson-subject">${lesson.subject}</div>
-                                <div class="lesson-room">${lesson.room}</div>
+                                <div class="lesson-content">
+                                    <div class="lesson-subject">${lesson.subject}</div>
+                                    <div class="lesson-room">${lesson.room}</div>
+                                </div>
                             </div>
                         `;
                     });
@@ -599,8 +731,9 @@
             }
 
             weekHTML += `
+                </div>
                 <button class="back-btn" id="backToTodayBtn">
-                    ← Вернуться к сегодняшнему дню
+                    ← Вернуться к расписанию на день
                 </button>
             `;
 
@@ -651,22 +784,7 @@
                 });
                 renderFullWeekSchedule();
             });
-
-            // Адаптация при изменении размера окна
-            window.addEventListener('resize', function() {
-                const activeBtn = document.querySelector('.day-btn.active');
-                if (activeBtn) {
-                    const dayIndex = parseInt(activeBtn.getAttribute('data-day'));
-                    renderDaySchedule(getCurrentWeekType(), dayIndex);
-                }
-            });
         });
-
-        // Принудительное обновление кэша
-        if (window.location.search.indexOf('v=') === -1) {
-            window.location.search = '?v=' + Date.now();
-        }
     </script>
 </body>
 </html>
-
