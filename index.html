@@ -16,7 +16,7 @@
             color: #333;
         }
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 15px;
@@ -35,13 +35,18 @@
         }
         .controls {
             display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 15px;
             margin-bottom: 30px;
             background: #ecf0f1;
             padding: 20px;
             border-radius: 10px;
+        }
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         .day-selector {
             display: flex;
@@ -64,6 +69,20 @@
         }
         .day-btn:hover {
             opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .week-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 50px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .week-btn:hover {
+            background-color: #2980b9;
             transform: translateY(-2px);
         }
         .current-info {
@@ -114,6 +133,7 @@
         .time {
             font-weight: bold;
             color: #2980b9;
+            min-width: 120px;
         }
         .subject {
             font-weight: bold;
@@ -125,13 +145,80 @@
             color: #95a5a6;
             font-style: italic;
         }
+        .full-week-title {
+            text-align: center;
+            margin: 20px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .day-schedule {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .day-header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .day-lessons {
+            padding: 15px;
+        }
+        .lesson-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .lesson-item:last-child {
+            border-bottom: none;
+        }
+        .lesson-time {
+            font-weight: bold;
+            color: #2980b9;
+            min-width: 120px;
+        }
+        .lesson-subject {
+            flex-grow: 1;
+            margin: 0 20px;
+        }
+        .lesson-room {
+            color: #7f8c8d;
+        }
+        .back-btn {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .back-btn:hover {
+            background-color: #7f8c8d;
+        }
         @media (max-width: 600px) {
-            .controls {
+            .controls-row {
                 flex-direction: column;
                 align-items: center;
             }
             .day-selector {
                 justify-content: center;
+            }
+            .lesson-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
             }
         }
     </style>
@@ -146,15 +233,22 @@
         </div>
 
         <div class="controls">
-            <div class="day-selector">
-                <div>Выберите день:</div>
-                <button class="day-btn" data-day="0">Пн</button>
-                <button class="day-btn" data-day="1">Вт</button>
-                <button class="day-btn" data-day="2">Ср</button>
-                <button class="day-btn" data-day="3">Чт</button>
-                <button class="day-btn" data-day="4">Пт</button>
-                <button class="day-btn" data-day="5">Сб</button>
-                <button class="day-btn" data-day="6">Вс</button>
+            <div class="controls-row">
+                <div class="day-selector">
+                    <div>Выберите день:</div>
+                    <button class="day-btn" data-day="0">Пн</button>
+                    <button class="day-btn" data-day="1">Вт</button>
+                    <button class="day-btn" data-day="2">Ср</button>
+                    <button class="day-btn" data-day="3">Чт</button>
+                    <button class="day-btn" data-day="4">Пт</button>
+                    <button class="day-btn" data-day="5">Сб</button>
+                    <button class="day-btn" data-day="6">Вс</button>
+                </div>
+            </div>
+            <div class="controls-row">
+                <button class="week-btn" id="fullWeekBtn">
+                    📅 Полное расписание на эту неделю
+                </button>
             </div>
         </div>
 
@@ -225,6 +319,7 @@
 
         // ==================== ОСНОВНАЯ ЛОГИКА ====================
         const dayNames = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"];
+        const dayNamesShort = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
         // Текущая дата
         const today = new Date();
@@ -234,7 +329,6 @@
         currentDayOfWeek = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
 
         // ========== АВТОМАТИЧЕСКОЕ ОПРЕДЕЛЕНИЕ НЕДЕЛИ ==========
-        // 2 сентября 2024 - первая учебная неделя (числитель)
         function getCurrentWeekType() {
             const startDate = new Date('2024-09-02'); // Понедельник, 2 сентября 2024 - числитель
             const now = new Date();
@@ -257,8 +351,8 @@
         
         const currentWeekType = getCurrentWeekType();
 
-        // Функция отрисовки расписания
-        function renderSchedule(weekType, dayIndex) {
+        // Функция отрисовки расписания на один день
+        function renderDaySchedule(weekType, dayIndex) {
             const scheduleDiv = document.getElementById('schedule');
             const currentInfoDiv = document.querySelector('.current-info');
             
@@ -309,6 +403,77 @@
             scheduleDiv.innerHTML = tableHTML;
         }
 
+        // Функция отрисовки полного расписания на неделю
+        function renderFullWeekSchedule() {
+            const scheduleDiv = document.getElementById('schedule');
+            const currentInfoDiv = document.querySelector('.current-info');
+            const weekType = getCurrentWeekType();
+            
+            const weekClassName = weekType === 'numerator' ? 'week-numerator' : 'week-denominator';
+            const weekName = weekType === 'numerator' ? 'ЧИСЛИТЕЛЬ' : 'ЗНАМЕНАТЕЛЬ';
+            
+            // Обновляем информацию вверху
+            currentInfoDiv.innerHTML = `
+                <strong>Полное расписание на текущую неделю:</strong> неделя 
+                <span class="week-indicator ${weekClassName}">${weekName}</span>
+            `;
+
+            let weekHTML = '<div class="full-week-title">Расписание на неделю</div>';
+
+            // Для каждого дня недели
+            for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+                const lessons = scheduleData[weekType][dayIndex.toString()];
+                const dayName = dayNames[dayIndex];
+                const isToday = dayIndex === currentDayOfWeek;
+                
+                weekHTML += `
+                    <div class="day-schedule">
+                        <div class="day-header">
+                            <span>${dayName} ${isToday ? ' (сегодня)' : ''}</span>
+                            <span class="week-indicator ${weekClassName}" style="font-size: 0.9em;">${weekName}</span>
+                        </div>
+                        <div class="day-lessons">
+                `;
+                
+                if (!lessons || lessons.length === 0) {
+                    weekHTML += '<p class="no-lessons" style="padding: 20px; margin: 0;">Занятий нет</p>';
+                } else {
+                    lessons.forEach(lesson => {
+                        weekHTML += `
+                            <div class="lesson-item">
+                                <span class="lesson-time">${lesson.time}</span>
+                                <span class="lesson-subject">${lesson.subject}</span>
+                                <span class="lesson-room">${lesson.room}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                weekHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Добавляем кнопку возврата
+            weekHTML += `
+                <button class="back-btn" id="backToTodayBtn">
+                    ← Вернуться к сегодняшнему дню
+                </button>
+            `;
+
+            scheduleDiv.innerHTML = weekHTML;
+            
+            // Добавляем обработчик для кнопки возврата
+            document.getElementById('backToTodayBtn').addEventListener('click', function() {
+                const activeDayBtn = document.querySelector(`.day-btn[data-day="${currentDayOfWeek}"]`);
+                if (activeDayBtn) {
+                    setActiveDayButton(activeDayBtn);
+                    renderDaySchedule(getCurrentWeekType(), currentDayOfWeek);
+                }
+            });
+        }
+
         // Функция переключения активных кнопок дней
         function setActiveDayButton(activeButton) {
             document.querySelectorAll('.day-btn').forEach(btn => {
@@ -333,7 +498,7 @@
             }
             
             // Показываем расписание на сегодня
-            renderSchedule(currentWeekType, currentDayOfWeek);
+            renderDaySchedule(currentWeekType, currentDayOfWeek);
 
             // Обработчики для кнопок дней
             document.querySelectorAll('.day-btn').forEach(btn => {
@@ -343,16 +508,25 @@
                     // Активируем нажатую кнопку
                     setActiveDayButton(this);
                     
-                    // Определяем текущую неделю (обновляем каждый раз)
+                    // Определяем текущую неделю
                     const currentWeek = getCurrentWeekType();
                     
-                    // Показываем расписание
-                    renderSchedule(currentWeek, dayIndex);
+                    // Показываем расписание на выбранный день
+                    renderDaySchedule(currentWeek, dayIndex);
                 });
+            });
+
+            // Обработчик для кнопки полного расписания недели
+            document.getElementById('fullWeekBtn').addEventListener('click', function() {
+                // Снимаем активность со всех кнопок дней
+                document.querySelectorAll('.day-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Показываем полное расписание
+                renderFullWeekSchedule();
             });
         });
     </script>
 </body>
-
 </html>
-
